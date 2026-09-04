@@ -34,7 +34,9 @@ def check_password():
         return True
 
     st.markdown("<h2 style='text-align: center;'>🔐 Customs Portal Authentication</h2>", unsafe_allow_html=True)
-    _, col2, _ = st.columns()
+    
+    # FIXED: Added the required number 3 to create three equal columns
+    _, col2, _ = st.columns(3)
     with col2:
         with st.form("Login Form"):
             username = st.text_input("Username", value="admin")
@@ -218,5 +220,3 @@ def convert_excel_to_edi_dict(excel_file):
                         str(v.get("Vehicle Engine Number", "")).upper(),
                         f"{float(v.get('Engine Capacity (Liters)', 0)):.2f}" if pd.notna(v.get('Engine Capacity (Liters)')) else "",
                         str(int(v.get("Passenger Capacity", 0))) if pd.notna(v.get('Passenger Capacity')) else "",
-                        f"{float(v.get('Carriage Capacity (Tons)', 0)):.2f}" if pd.notna(v.get('Carriage Capacity (Tons)')) else "",
-                    ]
