@@ -11,115 +11,197 @@ st.set_page_config(
     layout="wide"
 )
 
-# --- COMPLETE OFFICIAL CUSTOMS DICTIONARIES ---
+# Static Reference Data Dictionary based on Customs Guides
 CUSTOMS_MASTER = {
-    "INCOTERMS": {
-        "1": "CIF", "2": "CFR", "3": "FOB", "4": "FCA", "5": "CIP", 
-        "6": "CPT", "7": "DAF", "8": "DDP", "9": "DDU", "10": "DEQ", 
-        "11": "DES", "12": "EXW", "13": "FAS"
-    },
-    "PAYMENT_METHODS": {
-        "1": "Cash Cash Payment", "2": "T/T-Telex Transfer", "3": "L/C-Letter of credit", 
-        "4": "EP - Electronic Payment", "5": "Other", "6": "Draft", 
-        "7": "Bank transfer", "8": "DAC(Doc against Accept)", "9": "DAP(Doc against Payment)", 
-        "10": "Courier"
-    },
-    "INVOICE_TYPES": {
-        "1": "Commercial Invoice", "2": "Invoice", "3": "Pro Forma Invoice", 
-        "4": "Sales Invoice", "5": "Trade Invoice", "6": "Other", "7": "Delivery Invoice"
-    },
-    "VEHICLE_TYPES": {
-        "2WD": "2WD", "4WD": "4WD", "ALT": "ALL TERRAIN", "AUT": "AUTORIKSHA", "BDZ": "BULLDOZER", 
-        "BKT": "BUCKET", "BMG": "BOMAG", "BOM": "BOOM", "BUG": "BUGGY", "BUS": "BUS", 
-        "CAR": "CAR", "CMP": "CON. PUMP", "CMX": "CON. MIXER", "COM": "COMPACTOR", "CRN": "CRANE", 
-        "CRT": "CART", "DGR": "DRILLING RIG", "DMP": "DUMPER", "EXC": "EXCAVATOR", "FIN": "FINISHER", 
-        "FRK": "FORKLIFT", "GRD": "GRADER", "HCH": "HATCHBACK", "JEP": "JEEP", "JTS": "JETSKI", 
-        "LOD": "LOADER", "MBU": "MINI BUS", "MCY": "MOTORCYCLE", "MTK": "MINI TRUCK", "OTH": "OTHER", 
-        "PAV": "PAVER", "PIK": "PICK UP", "ROL": "ROLLER", "SCT": "SCOOTER", "SHO": "SHOVEL", 
-        "STW": "STATION WAGON", "SWP": "SWEEPE", "TRC": "TRACTOR", "TRK": "TRUCK", "TRL": "TRAILER", 
-        "VAN": "VAN", "VIB": "VIBRATOR", "WAG": "WAGON"
-    },
-    "VEHICLE_BRANDS": {
-        "1": "ACURA", "2": "AM GENERAL", "3": "ASTON MARTIN", "4": "AUDI", "5": "BENTLEY", 
-        "6": "BMW", "7": "BUICK", "8": "CADILLAC", "9": "CHEVROLET", "10": "CHRYSLER", 
-        "11": "DAEWOO", "12": "DODGE", "13": "FERRARI", "14": "FIAT", "15": "FORD", 
-        "16": "GENERAL MOTORS", "17": "GMC", "18": "HONDA", "19": "HYUNDAI", "20": "INFINITI", 
-        "21": "ISUZU", "22": "JAGUAR", "23": "JEEP", "24": "ΚΙΑ", "25": "LAND ROVER", 
-        "26": "LEXUS", "27": "LINCOLN", "28": "LOTUS", "29": "MAZDA", "30": "MERCEDES-BENZ", 
-        "31": "MERCURY", "32": "MITSUBISHI", "33": "NISSAN", "34": "OLDSMOBILE", "35": "PLYMOUTH", 
-        "36": "PONTIAC", "37": "PORSCHE", "38": "ROLLS-ROYCE", "39": "SAAB", "40": "SATURN", 
-        "41": "SEAT", "42": "SUBARU", "43": "SUZUKI", "44": "TOYOTA", "45": "VOLKSWAGEN", 
-        "46": "VOLVO", "47": "HINO", "48": "OPEL", "49": "HILUX", "50": "CHEROKEE", 
-        "51": "DATSUN", "52": "RENAULT", "53": "DAIHATSU", "54": "LANCIA", "55": "SPRINTER", 
-        "56": "GOLF", "57": "ROVER", "58": "CATERPILLAR", "59": "MORRIS", "60": "CAT", 
-        "61": "CITROEN", "62": "YAMAHA BIKE", "63": "DAIMLER", "64": "PEAUGEOT", "65": "KOMATSU", 
-        "66": "ALFA ROMEO", "67": "TCM", "68": "KAWASAKI", "69": "MESEFARGSON", "70": "ΜΕΚΟNG STAR", 
-        "71": "WRANGLER", "72": "PRIMEMOVER", "73": "TADANO", "74": "BOMBERDIER", "75": "SEEATURN", 
-        "77": "MINI COOPER", "78": "SMART", "79": "SSANGYONG", "80": "RAYMOND", "81": "KOBELCO", 
-        "82": "KUBOTA", "83": "RANGE ROVER", "84": "ELIMINATOR", "85": "TIANYE", "86": "PROTON", 
-        "87": "ISEKI", "88": "SCANIA", "89": "MG", "90": "BERTONE", "91": "MASERATI", 
-        "92": "SAMSUNG", "93": "HITACHI", "94": "LAMBORGHINI", "95": "JCB", "96": "FREIGHTLINER", 
-        "97": "ΚΑΤΟ", "99": "PERDUA", "100": "ADMIRAL", "101": "AERONAUTC HAICE", "102": "AICHI MANLIFT", 
-        "103": "ALLIS CHALMERS", "104": "AMERICAN", "105": "AMG", "106": "AMMAN", "107": "ΑΝΚΑΙ", 
-        "108": "APBILIA", "109": "AQUILA", "110": "ARIA", "111": "ASHOK LEYLAND", "112": "ASIA", 
-        "113": "ATLAS", "114": "ATOMIX", "115": "AUSA", "116": "AUSTIN", "117": "AWM", 
-        "118": "BAJAJ", "119": "BAOLI", "120": "BAOTOU BEISANG", "121": "BARBER GREEN", "122": "BAUER", 
-        "123": "BEDFORD", "124": "BEIFANJ", "125": "BENFORD", "126": "BIANCO", "127": "BITELLI", 
-        "128": "BLAWKNOX", "129": "BLOW KNIX", "130": "BMC", "131": "BOBCAT", "132": "BOMAG", 
-        "133": "BOSS", "134": "BOWER", "135": "BROCE", "136": "BT", "137": "BUCHER", 
-        "138": "BUELL", "139": "BUFORI", "140": "BUGGY", "141": "BUSSCAR", "142": "BUSUN", 
-        "143": "BYD", "144": "CARBODIES", "145": "CARMIX1", "146": "CASAGRANDE", "147": "CASE", 
-        "148": "CEDARAPIDS", "149": "CHANΝΑ", "150": "CHANG JIANG", "151": "CLARK", "152": "CLEVELAND", 
-        "153": "CMI", "154": "COBRA", "155": "COLES", "156": "CONDOR", "157": "CONMEX", 
-        "158": "CPCD", "159": "CRANE", "160": "DADIAUTO", "161": "DAF", "162": "DALIAN", 
-        "163": "DEMAG", "164": "DENNIS", "165": "DESPARADO", "166": "DITCHWITCH", "167": "DIV/MAG/EMB", 
-        "168": "DONG FENG", "169": "DOOSAN", "170": "DUCATI", "171": "DYNAPAC", "172": "EDSEL", 
-        "173": "ESCORTS", "174": "ESSEX", "175": "ESSLINGEN", "176": "EXCALIBUR", "177": "FAW", 
-        "178": "FERRARA", "179": "FIATALLIS", "180": "FORLAND", "181": "FUDI", "182": "FUMEC", 
-        "183": "FUQI", "184": "FURUKAWA", "185": "FUSHUN", "186": "FUWACRANE", "187": "GEHL", 
-        "188": "GENIE", "189": "GERMAN BOUCHER", "190": "GINAF", "191": "GODREJ", "192": "GOLDEN DRAGON", 
-        "193": "GONOW", "194": "GREATWALL", "195": "GRIGIO EXCALIBU", "196": "GROVE", "197": "HAIMA", 
-        "198": "HALLA", "199": "HAMM", "200": "HANATOO", "201": "HANG CHA", "202": "HANGZHOU", 
-        "203": "HANTA", "204": "HARLAN", "205": "HARLEY DAVIDSON", "206": "HASAROST", "207": "HAULOTTE", 
-        "208": "HELI", "209": "HIGER", "210": "HOFMANN", "211": "HONGYAN", "212": "HORMANN", 
-        "213": "HOWO", "214": "HU-LIFT", "215": "HUMMER", "216": "HUSQVARNG", "217": "HYCO", 
-        "218": "HYOSUNG", "219": "HYSTER", "220": "IHI", "221": "INGERSOLL", "222": "INTERNATIONAL", 
-        "223": "ISTAΝΑ", "224": "IVECO", "225": "IVNOVEC", "226": "JAC", "227": "JCL", 
-        "228": "JIEFANG", "229": "JINBEI", "230": "JINMA", "231": "JLG", "232": "JMSTAR", 
-        "233": "JOHN DEERE", "234": "JR", "235": "ΚΑΙ", "236": "ΚΑΙΤΟ", "237": "KALBNAES", 
-        "238": "KALMAR", "239": "ΚΑΜAG", "240": "ΚΑΜAZ", "241": "KENWORTH", "242": "KOEHRING", 
-        "243": "KRUPP", "244": "KTM", "245": "LADA", "246": "LAMBRETTA", "247": "LANCER BOSS", 
-        "248": "LANSING", "249": "LEYLAND", "250": "LIEBHERR", "251": "LIFAN", "252": "LIGIER", 
-        "253": "LIMA", "254": "LINDE", "255": "LINHAI", "256": "LINK BELT", "257": "LIUGONG", 
-        "258": "LOCATELLI", "259": "LULL", "260": "LUOYANG", "261": "MACK", "262": "MAGRIUS", 
-        "263": "MAHINDRA", "264": "MAN", "265": "ΜΑΝΙTOU", "266": "MANITWOC", "267": "MANJUSTA", 
-        "268": "MARINI", "269": "MASSEY", "270": "MAYBACH", "271": "MAZ TRACTOR", "272": "MECВО", 
-        "273": "MEIWA", "274": "MERTZ VIBRATOR", "275": "MITSU", "276": "MOL", "277": "MORGAN", 
-        "278": "MORO TRUCK", "279": "MOROOKA", "280": "MOTO GUZZI", "281": "MTR", "282": "MUDAN", 
-        "283": "MULTITOR", "284": "MVAGUSTA", "285": "NASHAMBASSADOR", "286": "NASTY BOY", "287": "NEO PLAN", 
-        "288": "NEWHOLLAND", "289": "NICHIYU", "290": "NICHOLAS", "291": "NIIGATA", "292": "ΝΙΡΟN - SHARYO", 
-        "293": "NISSEKI", "294": "NL", "295": "NOBLE", "296": "NORTON COMMANDO", "297": "NYK", 
-        "298": "O&K", "299": "ORIENTSTAR", "300": "OSHKOSH", "301": "P&H", "302": "PAGANI", 
-        "303": "PATRICK", "304": "PEGASUS", "305": "PENG PU", "306": "PERLINI", "307": "PETERBILT MODEL", 
-        "308": "PETTIBONE", "309": "PHEATON", "310": "PIAGGIO", "311": "PICCINI", "312": "PIPELINE", 
-        "313": "PLATFORM", "314": "POLARIS", "315": "POLARSUN", "316": "POWERPLUS", "317": "PROFFI", 
-        "318": "PROTEC", "319": "PUMA", "320": "PUYUAN", "321": "QINGQI", "322": "RANDON", 
-        "323": "RAPTOR", "324": "RECORD", "325": "REWACO", "326": "RHINO", "327": "RINSPEED", 
-        "328": "ROCKY-D", "329": "ROSCO", "330": "SAKΑΙ", "331": "SANDVIK", "332": "SANY", 
-        "333": "SARD", "334": "SAURER", "335": "SCAMMEL", "336": "SCHWING", "337": "SDLG", 
-        "338": "Seadoo", "339": "SENNEBOGEN", "340": "SERCEL MERTZ", "341": "SEWER SANITARY", "342": "SHAANXI", 
-        "343": "SHAC", "344": "SHACMAN", "345": "SHANTUI", "346": "SHENYANG LEILON", "347": "SHIBAURA", 
-        "348": "SHIFENG", "349": "SHINKO", "350": "SILLA", "351": "SILVERWING", "352": "SINO TRUCK", 
-        "353": "SISU", "354": "SKID STEER", "355": "SKODA", "356": "SMV", "357": "SOILMEC", 
-        "358": "SOOSUNG", "359": "SOYAT JUNDA", "360": "STA", "361": "STADE", "362": "STERLING", 
-        "363": "STEYRA", "364": "STILL", "365": "STUDEBAKER", "366": "STYER", "367": "SUMITOMO", 
-        "368": "SUNVOYAGER", "369": "SUNWARD", "370": "SVE", "371": "TAMROCK", "372": "ΤΑΤΑ", 
-        "373": "TATA DAEWOO", "374": "ΤΕΝΝANT", "375": "TEREX", "376": "TGT", "377": "THWAITES", 
-        "378": "TIGER", "379": "ΤΟΚYU", "380": "TOYO", "381": "TOYOTA SIENNA", "382": "TRACKJET", 
-        "383": "TRENCHER", "384": "TRIUMP", "385": "TRIVELSONDA", "386": "TRUIMPH", "387": "TUK TUK", 
-        "388": "UNIVERSAL", "389": "URAIM", "390": "URAL", "391": "URBANUSS", "392": "VANTAGE", 
-        "393": "VERMEER", "394": "VERYCA", "395": "VESPA", "396": "VIBRATOR", "397": "VIBROMAX", 
-        "398": "VMOTO", "399": "VOGELE", "400": "VOLAT", "401": "VOLTAS", "402": "WATANABE", 
-        "403": "WEICHAI", "404": "WIGGINS", "405": "WINDHAM", "406": "WOMBAT", "407": "WONJAN", 
-        "408": "WUZHOULONG", "409": "XCMG", "410": "XGMA", "411": "XILIN", "412": "ΧΙΝΚΑΙ", 
-        "413": "YALE", "414": "YANMAR", "415": "ΥΙΝΧΙANG", "416": "ΥΤΟ", "417": "YUCHAI", 
+    "INCOTERMS": {"CIF": "Cost, Insurance & Freight", "CFR": "Cost and Freight", "FOB": "Free on Board", "EXW": "Ex Works", "CIP": "Carriage & Insurance Paid To", "CPT": "Carriage Paid To"},
+    "PAYMENT_METHODS": {"1": "Cash Payment", "2": "T/T - Telex Transfer", "3": "L/C - Letter of Credit", "4": "EP - Electronic Payment", "7": "Bank Transfer"},
+    "VEHICLE_BRANDS": {"5": "BENTLEY", "32": "MITSUBISHI", "44": "TOYOTA", "6": "BMW", "30": "MERCEDES-BENZ", "33": "NISSAN", "19": "HYUNDAI"},
+    "VEHICLE_TYPES": {"CAR": "Passenger Car", "PIK": "Pick Up Truck", "VAN": "Van / Delivery Vehicle", "TRK": "Commercial Truck", "BUS": "Bus / Transport"}
+}
+
+# Sidebar Branding and Admin Info
+with st.sidebar:
+    st.title("👨‍💻 System Administrator")
+    st.info("💡 **Developed by: Lahiru**")
+    st.markdown("---")
+    st.markdown("""
+    ### 🎨 How to Change Themes:
+    1. Click the **three dots (⋮)** in the top-right corner of the webpage.
+    2. Go to **Settings** → **Theme**.
+    3. Switch between **Light** or **Dark** templates.
+    """)
+
+# 2. Login Security Protocol Layer
+def check_password():
+    if "authenticated" not in st.session_state:
+        st.session_state["authenticated"] = False
+    if st.session_state["authenticated"]:
+        return True
+
+    st.markdown("<h2 style='text-align: center;'>🔐 Customs Portal Authentication</h2>", unsafe_allow_html=True)
+    _, col2, _ = st.columns([1, 2, 1])
+    with col2:
+        with st.form("Login Form"):
+            username = st.text_input("Username", value="admin")
+            password = st.text_input("Password", type="password")
+            submit = st.form_submit_button("Access Workspace")
+            if submit:
+                if username == "admin" and password == "DubaiCustoms2026":
+                    st.session_state["authenticated"] = True
+                    st.success("Access Granted! Loading profile...")
+                    st.rerun()
+                else:
+                    st.error("❌ Incorrect username or password configuration.")
+    return False
+
+if not check_password():
+    st.stop()
+
+# --- MAIN WORKSPACE APP ---
+st.title("🇦🇪 Dubai Customs EDI Flat File Platform")
+st.subheader("Automated Spreadsheet-to-EDI Translation Studio")
+st.caption("🔒 Secured Workspace Session")
+st.markdown("---")
+
+# 3. Customs Reference Definition Lookup Tabs
+st.markdown("### 🔍 Live Customs Definition Lookup Desk")
+tab1, tab2, tab3 = st.tabs(["📦 HS Code / Item Rules", "🚘 Vehicle Specifications", "🌍 Country & Shipping Terms"])
+
+with tab1:
+    c1, col_hs = st.columns([2, 3])
+    with c1:
+        st.write("**HS Commodity Rules:**")
+        st.caption("• Must be a minimum of 8 digits.\n• Cannot contain periods, spaces, or letters.")
+    with col_hs:
+        search_hs = st.text_input("Test an HS Code for verification:", placeholder="e.g., 84133000")
+        if search_hs:
+            clean_hs = re.sub(r'[^0-9]', '', search_hs)
+            if len(clean_hs) >= 8:
+                st.success(f"✅ Valid format pattern structure detected ({len(clean_hs)} digits).")
+            else:
+                st.error(f"❌ Pattern error: Code is only {len(clean_hs)} digits long. Minimum length required is 8 digits.")
+
+with tab2:
+    v_col1, v_col2 = st.columns(2)
+    with v_col1:
+        st.write("**Official Vehicle Brand Reference IDs:**")
+        st.dataframe(pd.DataFrame(list(CUSTOMS_MASTER["VEHICLE_BRANDS"].items()), columns=["Brand Code", "Brand Name"]), hide_index=True)
+    with v_col2:
+        st.write("**Official Vehicle Type Classifications:**")
+        st.dataframe(pd.DataFrame(list(CUSTOMS_MASTER["VEHICLE_TYPES"].items()), columns=["Type Code", "Description"]), hide_index=True)
+
+with tab3:
+    s_col1, s_col2 = st.columns(2)
+    with s_col1:
+        st.write("**Valid INCOTERMS Delivery Methods:**")
+        st.dataframe(pd.DataFrame(list(CUSTOMS_MASTER["INCOTERMS"].items()), columns=["Incoterm", "Meaning"]), hide_index=True)
+    with s_col2:
+        st.write("**Payment Instrument Reference Lookups:**")
+        st.dataframe(pd.DataFrame(list(CUSTOMS_MASTER["PAYMENT_METHODS"].items()), columns=["Instrument ID", "Method Name"]), hide_index=True)
+
+st.markdown("---")
+
+# 4. Diagnostic Data Validation Logic
+def validate_customs_data(parts_df, vehicles_df):
+    errors = []
+    for idx, row in parts_df.iterrows():
+        row_num = idx + 3
+        inv = str(row.get("Invoice Number", "Unknown"))
+        
+        hs = str(row.get("HS Code", "")).strip()
+        if pd.isna(row.get("HS Code")) or hs == "":
+            errors.append(f"⚠️ Row {row_num} (Inv: {inv}): Missing Commodity HS Code.")
+        elif not hs.replace('.','').isdigit() or len(hs.replace('.','')) < 8:
+            errors.append(f"⚠️ Row {row_num} (Inv: {inv}): HS Code '{hs}' must contain at least 8 numeric digits.")
+            
+        coo = str(row.get("Country of Origin (2 Letter)", "")).strip()
+        if pd.isna(row.get("Country of Origin (2 Letter)")) or len(coo) != 2:
+            errors.append(f"⚠️ Row {row_num} (Inv: {inv}): Country of Origin '{coo}' must be exactly a 2-letter ISO code (e.g., JP, TH).")
+
+    if not vehicles_df.empty:
+        for idx, row in vehicles_df.iterrows():
+            row_num = idx + 3
+            v_inv = str(row.get("Invoice Number Link", "Unknown"))
+            chassis = str(row.get("Vehicle Chassis Number", "")).strip()
+            if pd.isna(row.get("Vehicle Chassis Number")) or chassis == "":
+                errors.append(f"❌ Row {row_num} (Vehicle Tab): Missing Vehicle Chassis Number.")
+            elif len(chassis) != 17:
+                errors.append(f"❌ Row {row_num} (Vehicle Tab, Inv: {v_inv}): Chassis Number '{chassis}' is {len(chassis)} characters. Must be exactly 17 characters.")
+    return errors
+
+# 5. Core EDI Parsing & Translation Logic Engine
+def convert_excel_to_edi_dict(excel_file):
+    try:
+        parts_df = pd.read_excel(excel_file, sheet_name="Invoices & Spare Parts", skiprows=1)
+    except Exception as e:
+        st.error(f"❌ Failed to parse 'Invoices & Spare Parts' tab. Error: {str(e)}")
+        return None, None
+
+    try:
+        vehicles_df = pd.read_excel(excel_file, sheet_name="Vehicle Details", skiprows=1)
+    except Exception:
+        vehicles_df = pd.DataFrame()
+
+    parts_df['Invoice Number'] = parts_df['Invoice Number'].astype(str).str.strip()
+    if not vehicles_df.empty:
+        vehicles_df['Invoice Number Link'] = vehicles_df['Invoice Number Link'].astype(str).str.strip()
+
+    validation_logs = validate_customs_data(parts_df, vehicles_df)
+    unique_invoices = [inv for inv in parts_df['Invoice Number'].dropna().unique() if str(inv).lower() != 'nan' and str(inv).strip() != '']
+    edi_outputs = {}
+
+    for inv_no in unique_invoices:
+        safe_inv_name = re.sub(r'[\\/*?:"<>|]', "", inv_no)
+        output_filename = f"Invoice_{safe_inv_name}_Declaration.txt"
+        current_items = parts_df[parts_df['Invoice Number'] == inv_no]
+        first_row = current_items.iloc
+
+        string_buffer = io.StringIO()
+        writer = csv.writer(string_buffer, delimiter=',', quoting=csv.QUOTE_ALL)
+
+        try:
+            inv_val = f"{float(first_row.get('Total Invoice Value', 0)):.2f}"
+        except Exception:
+            inv_val = "0.00"
+
+        # Write Invoice Header (IH)
+        ih_row = [
+            "IH", inv_no, str(first_row.get("Invoice Date (YYYY-MM-DD)", "")).split()[0] if pd.notna(first_row.get("Invoice Date (YYYY-MM-DD)")) else "",
+            "1", "1", str(first_row.get("Seller Name", "")), "1", "1",
+            str(first_row.get("Invoice Currency", "AED")), inv_val,
+            str(first_row.get("INCO Terms", "CIF")), "", "", "", ""
+        ]
+        writer.writerow(ih_row)
+
+        # Write Line Item (ID)
+        for idx, (_, item) in enumerate(current_items.iterrows(), start=1):
+            line_no = item.get("Line Number", idx)
+            clean_item_hs = str(item.get("HS Code", "")).replace('.', '').strip()
+            try:
+                net_wt = f"{float(item.get('Net Weight (kg)', 0)):.4f}"
+            except Exception:
+                net_wt = "0.0000"
+            try:
+                line_val = f"{float(item.get('Line Total Value', 0)):.2f}"
+            except Exception:
+                line_val = "0.00"
+
+            id_row = [
+                "ID", str(int(line_no)), clean_item_hs,
+                str(item.get("Goods Description", "")), str(item.get("Goods Condition (N/U)", "N")),
+                str(item.get("Qty Unit", "kg")), str(item.get("Quantity", "1")),
+                "kg", net_wt, "", "", line_val,
+                str(item.get("Country of Origin (2 Letter)", "JP")).strip().upper(),
+                "", "", "", "", ""
+            ]
+            writer.writerow(id_row)
+
+            # Write Connected Vehicle Sub-Lines (VD)
+            if not vehicles_df.empty:
+                matching_vds = vehicles_df[(vehicles_df['Invoice Number Link'] == inv_no) & (vehicles_df['Invoice Line Number Link'] == line_no)]
+                for _, v in matching_vds.iterrows():
+                    vd_row = [
+                        "VD", str(v.get("Vehicle Chassis Number", "")).strip().upper(), 
+                        str(int(v.get("Vehicle Brand Code", 5))) if pd.notna(v.get("Vehicle Brand Code")) else "5",
+                        str(v.get("Vehicle Model", "")), str(v.get("Vehicle Engine Number", "")),
+                        f"{float(v.get('Engine Capacity (Liters)', 0)):.2f}" if pd.notna(v.get('Engine Capacity (Liters)')) else "",
