@@ -220,3 +220,4 @@ def convert_excel_to_edi_dict(excel_file):
                         str(v.get("Vehicle Engine Number", "")).upper(),
                         f"{float(v.get('Engine Capacity (Liters)', 0)):.2f}" if pd.notna(v.get('Engine Capacity (Liters)')) else "",
                         str(int(v.get("Passenger Capacity", 0))) if pd.notna(v.get('Passenger Capacity')) else "",
+                        ]
