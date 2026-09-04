@@ -221,4 +221,55 @@ with w2:
             for filename, text_data in output_files.items():
                 with st.expander(f"📁 {filename}", expanded=True):
                     st.text_area("File content preview (All Capitalized)", text_data[:400], height=120, disabled=True)
+                    # Complete Download Button structure configuration
                     st.download_button(
+                        label=f"⬇️ Download File Stream", 
+                        data=text_data,
+                        file_name=filename, 
+                        mime="text/plain", 
+                        key=filename
+                    )
+    else:
+        st.info("System operational. Drop your tracking spreadsheets above to execute structural compilation blocks.")
+
+st.markdown("<br><br><hr>", unsafe_allow_html=True)
+
+
+# 5. Interactive Code Search desk (Moved to the bottom)
+st.markdown("### 🔍 Live Customs Definition Lookup Desk")
+tab1, tab2, tab3 = st.tabs(["📦 HS Code & Rules", "🚘 Vehicle Specification Codes", "🌍 Payment Terms & Currencies"])
+
+with tab1:
+    c1, col_hs = st.columns(2)
+    with c1:
+        st.write("**HS Code Rules:**")
+        st.caption("• Must be exactly 8 digits or longer.\n• Period characters are stripped dynamically by our engine.")
+    with col_hs:
+        search_hs = st.text_input("Test formatting rules for an HS code:", placeholder="e.g., 8708.29.90")
+        if search_hs:
+            clean_hs = re.sub(r'[^0-9]', '', search_hs)
+            if len(clean_hs) >= 8:
+                st.success(f"✅ Valid Format Pattern ({len(clean_hs)} digits generated).")
+            else:
+                st.error(f"❌ Error: Extracted code is only {len(clean_hs)} digits. Target needs 8 digits.")
+
+with tab2:
+    v_col1, v_col2 = st.columns(2)
+    with v_col1:
+        st.write("**Official Vehicle Brand Codes (451 Records):**")
+        search_brand = st.text_input("Search Brand Name (e.g. TOYOTA, BENTLEY):").upper()
+        brand_data = [{"Code": k, "Name": v} for k, v in customs_data.VEHICLE_BRANDS.items() if search_brand in v]
+        st.dataframe(pd.DataFrame(brand_data), hide_index=True, use_container_width=True, height=200)
+    with v_col2:
+        st.write("**Official Vehicle Type Classifications:**")
+        st.dataframe(pd.DataFrame(list(customs_data.VEHICLE_TYPES.items()), columns=["Type Code", "Description"]), hide_index=True, use_container_width=True, height=200)
+
+with tab3:
+    s_col1, s_col2 = st.columns(2)
+    with s_col1:
+        st.write("**Payment Instrument Codes:**")
+        st.dataframe(pd.DataFrame(list(customs_data.PAYMENT_METHODS.items()), columns=["ID Code", "Method Name"]), hide_index=True, use_container_width=True)
+    with s_col2:
+        st.write("**INCOTERMS Codes:**")
+        st.dataframe(pd.DataFrame(list(customs_data.INCOTERMS.items()), columns=["ID", "Incoterm Code"]), hide_index=True, use_container_width=True)
+
