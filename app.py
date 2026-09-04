@@ -4,23 +4,67 @@ import csv
 import io
 import re
 
-# Set page design configuration
+# 1. Page & Personal Branding Configurations
 st.set_page_config(
-    page_title="Dubai Customs EDI Flat File Generator",
+    page_title="Dubai Customs EDI Generator",
     page_icon="🇦🇪",
     layout="wide"
 )
 
+# Sidebar with Developer Info & Custom Theme Guide
+with st.sidebar:
+    st.title("👨‍💻 System Administrator")
+    st.info("💡 **Developed by: Lahiru**")
+    st.markdown("---")
+    st.markdown("""
+    ### 🎨 How to Change Themes:
+    1. Click the **three dots (⋮)** in the top-right corner of the webpage.
+    2. Go to **Settings** → **Theme**.
+    3. Switch between **Light**, **Dark**, or **Custom System** options to instantly change colors.
+    """)
+
+# 2. Secure Login Authentication Control Layer
+def check_password():
+    """Returns True if the user entered the correct password."""
+    if "authenticated" not in st.session_state:
+        st.session_state["authenticated"] = False
+
+    if st.session_state["authenticated"]:
+        return True
+
+    # Render login form window
+    st.markdown("<h2 style='text-align: center;'>🔐 Customs Portal Authentication</h2>", unsafe_allow_html=True)
+    col1, col2, col3 = st.columns([1, 2, 1])
+    
+    with col2:
+        with st.form("Login Form"):
+            username = st.text_input("Username", value="admin")
+            password = st.text_input("Password", type="password")
+            submit = st.form_submit_button("Access Workspace")
+            
+            # Change these credentials to your preference
+            if submit:
+                if username == "admin" and password == "DubaiCustoms2026":
+                    st.session_state["authenticated"] = True
+                    st.success("Access Granted! Loading profile...")
+                    st.rerun()
+                else:
+                    st.error("❌ Incorrect username or password configuration.")
+    return False
+
+# Stop execution if user is not authenticated
+if not check_password():
+    st.stop()
+
+# --- MAIN WORKSPACE INTERFACE LOGIC (Runs only after typing correct password) ---
+
 st.title("🇦🇪 Dubai Customs EDI Flat File Platform")
 st.subheader("Automated Spreadsheet-to-EDI Translation Studio")
+st.caption("🔒 Secured Workspace Session")
 st.markdown("---")
 
 def convert_excel_to_edi_dict(excel_file):
-    """
-    Processes uploaded Excel data buffers, maps vehicle references contextually,
-    and returns a dictionary of output filename strings paired with their EDI text bodies.
-    """
-    # Load separate data sheets
+    """Processes uploaded Excel data buffers and formats divided invoice strings."""
     try:
         parts_df = pd.read_excel(excel_file, sheet_name="Invoices & Spare Parts", skiprows=1)
     except Exception as e:
@@ -32,12 +76,10 @@ def convert_excel_to_edi_dict(excel_file):
     except Exception:
         vehicles_df = pd.DataFrame()
 
-    # Normalize data formatting strings to prevent mapping errors
     parts_df['Invoice Number'] = parts_df['Invoice Number'].astype(str).str.strip()
     if not vehicles_df.empty:
         vehicles_df['Invoice Number Link'] = vehicles_df['Invoice Number Link'].astype(str).str.strip()
 
-    # Extract unique invoice entries
     unique_invoices = parts_df['Invoice Number'].dropna().unique()
     unique_invoices = [inv for inv in unique_invoices if str(inv).lower() != 'nan' and str(inv).strip() != '']
 
@@ -50,11 +92,9 @@ def convert_excel_to_edi_dict(excel_file):
         current_items = parts_df[parts_df['Invoice Number'] == inv_no]
         first_row = current_items.iloc[0]
 
-        # Structure text container out stream
         string_buffer = io.StringIO()
         writer = csv.writer(string_buffer, delimiter=',', quoting=csv.QUOTE_ALL)
 
-        # 1. Map Invoice Header Structure (IH)
         try:
             inv_val = f"{float(first_row.get('Total Invoice Value', 0)):.2f}"
         except Exception:
@@ -69,7 +109,6 @@ def convert_excel_to_edi_dict(excel_file):
         ]
         writer.writerow(ih_row)
 
-        # 2. Map Line Items Details Structure (ID)
         for idx, (_, item) in enumerate(current_items.iterrows(), start=1):
             line_no = item.get("Line Number", idx)
             
@@ -93,7 +132,6 @@ def convert_excel_to_edi_dict(excel_file):
             ]
             writer.writerow(id_row)
 
-            # 3. Map Nested Vehicle Details Structure (VD)
             if not vehicles_df.empty:
                 matching_vds = vehicles_df[
                     (vehicles_df['Invoice Number Link'] == inv_no) & 
@@ -118,7 +156,6 @@ def convert_excel_to_edi_dict(excel_file):
 
     return edi_outputs
 
-# Setup Dashboard Column View Layouts
 col1, col2 = st.columns([1, 2])
 
 with col1:
@@ -140,10 +177,9 @@ with col2:
         if output_files:
             st.metric(label="Detected Independent Commercial Invoices", value=len(output_files))
             
-            # Loop through files and generate separate card spaces for individual split downloads
             for filename, text_data in output_files.items():
                 with st.expander(f"📁 {filename}", expanded=True):
-                    st.text_area("File preview window (Truncated view)", text_data[:400] + "\n...", height=120, disabled=True)
+                    st.text_area("File preview window", text_data[:400] + "\n...", height=120, disabled=True)
                     st.download_button(
                         label=f"⬇️ Download File Stream",
                         data=text_data,
