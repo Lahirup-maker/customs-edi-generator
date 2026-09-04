@@ -35,7 +35,6 @@ def check_password():
 
     st.markdown("<h2 style='text-align: center;'>🔐 Customs Portal Authentication</h2>", unsafe_allow_html=True)
     
-    # FIXED: Added the required number 3 to create three equal columns
     _, col2, _ = st.columns(3)
     with col2:
         with st.form("Login Form"):
@@ -60,47 +59,8 @@ st.subheader("Automated Spreadsheet-to-EDI Translation Studio")
 st.caption("🔒 Secured Workspace Session")
 st.markdown("---")
 
-# 3. Interactive Code Search desk
-st.markdown("### 🔍 Live Customs Definition Lookup Desk")
-tab1, tab2, tab3 = st.tabs(["📦 HS Code & Rules", "🚘 Vehicle Specification Codes", "🌍 Payment Terms & Currencies"])
 
-with tab1:
-    c1, col_hs = st.columns(2)
-    with c1:
-        st.write("**HS Code Rules:**")
-        st.caption("• Must be exactly 8 digits or longer.\n• Period characters are stripped dynamically by our engine.")
-    with col_hs:
-        search_hs = st.text_input("Test formatting rules for an HS code:", placeholder="e.g., 8708.29.90")
-        if search_hs:
-            clean_hs = re.sub(r'[^0-9]', '', search_hs)
-            if len(clean_hs) >= 8:
-                st.success(f"✅ Valid Format Pattern ({len(clean_hs)} digits generated).")
-            else:
-                st.error(f"❌ Error: Extracted code is only {len(clean_hs)} digits. Target needs 8 digits.")
-
-with tab2:
-    v_col1, v_col2 = st.columns(2)
-    with v_col1:
-        st.write("**Official Vehicle Brand Codes (451 Records):**")
-        search_brand = st.text_input("Search Brand Name (e.g. TOYOTA, BENTLEY):").upper()
-        brand_data = [{"Code": k, "Name": v} for k, v in customs_data.VEHICLE_BRANDS.items() if search_brand in v]
-        st.dataframe(pd.DataFrame(brand_data), hide_index=True, use_container_width=True, height=200)
-    with v_col2:
-        st.write("**Official Vehicle Type Classifications:**")
-        st.dataframe(pd.DataFrame(list(customs_data.VEHICLE_TYPES.items()), columns=["Type Code", "Description"]), hide_index=True, use_container_width=True, height=200)
-
-with tab3:
-    s_col1, s_col2 = st.columns(2)
-    with s_col1:
-        st.write("**Payment Instrument Codes:**")
-        st.dataframe(pd.DataFrame(list(customs_data.PAYMENT_METHODS.items()), columns=["ID Code", "Method Name"]), hide_index=True, use_container_width=True)
-    with s_col2:
-        st.write("**INCOTERMS Codes:**")
-        st.dataframe(pd.DataFrame(list(customs_data.INCOTERMS.items()), columns=["ID", "Incoterm Code"]), hide_index=True, use_container_width=True)
-
-st.markdown("---")
-
-# 4. Live Diagnostic Scanner Logic
+# 3. Live Diagnostic Scanner Logic
 def validate_customs_data(parts_df, vehicles_df):
     errors = []
     for idx, row in parts_df.iterrows():
@@ -129,7 +89,7 @@ def validate_customs_data(parts_df, vehicles_df):
                 errors.append(f"❌ Row {row_num} (Vehicle Sheet, Inv: {v_inv}): Chassis string '{chassis}' is {len(chassis)} digits. Standard VINs are exactly 17 characters.")
     return errors
 
-# 5. Document Compiler Engine with Forced Capitalization
+# 4. Document Compiler Engine with Forced Capitalization
 def convert_excel_to_edi_dict(excel_file):
     try:
         parts_df = pd.read_excel(excel_file, sheet_name="Invoices & Spare Parts", skiprows=1)
@@ -220,4 +180,45 @@ def convert_excel_to_edi_dict(excel_file):
                         str(v.get("Vehicle Engine Number", "")).upper(),
                         f"{float(v.get('Engine Capacity (Liters)', 0)):.2f}" if pd.notna(v.get('Engine Capacity (Liters)')) else "",
                         str(int(v.get("Passenger Capacity", 0))) if pd.notna(v.get('Passenger Capacity')) else "",
-                        ]
+                        f"{float(v.get('Carriage Capacity (Tons)', 0)):.2f}" if pd.notna(v.get('Carriage Capacity (Tons)')) else "",
+                        str(int(v.get("Year of Built (YYYY)", 2024))) if pd.notna(v.get("Year of Built (YYYY)")) else "", 
+                        str(v.get("Vehicle Color", "")).upper(), 
+                        str(v.get("Vehicle Condition (New/Used)", "New")).upper(), 
+                        type_val, 
+                        str(v.get("Vehicle Drive (L/R)", "L")).upper(), 
+                        str(int(v.get("Specification (1=GCC, 2=Non-GCC)", 1))) if pd.notna(v.get("Specification (1=GCC, 2=Non-GCC)")) else "1"
+                    ]
+                    vd_row = [str(x) for x in vd_row]
+                    writer.writerow(vd_row)
+
+        edi_outputs[output_filename] = string_buffer.getvalue()
+    return edi_outputs, validation_logs
+
+
+# --- MOVED INTERFACE TO THE TOP FOR MAXIMUM VISIBILITY ---
+w1, w2 = st.columns(2)
+
+with w1:
+    st.info("💡 **Step 1: Document Upload**")
+    uploaded_file = st.file_uploader("Upload your Customs_Template.xlsx file here", type=["xlsx"])
+
+with w2:
+    st.success("⚡ **Step 2: Analysis & File Generation**")
+    if uploaded_file is not None:
+        with st.spinner("Analyzing spreadsheet arrays and forcing uppercase formatting..."):
+            output_files, logs = convert_excel_to_edi_dict(uploaded_file)
+            
+        if logs:
+            st.error("🚨 **Spreadsheet Validation Warning Logs**")
+            for log in logs:
+                st.write(log)
+            st.warning("Please verify data warnings prior to clearing submissions.")
+        else:
+            st.success("✅ **Data Quality Scan Passed! All values have been processed successfully.**")
+            
+        if output_files:
+            st.markdown(f"### 📂 Split Invoice Batches Available: `{len(output_files)}`")
+            for filename, text_data in output_files.items():
+                with st.expander(f"📁 {filename}", expanded=True):
+                    st.text_area("File content preview (All Capitalized)", text_data[:400], height=120, disabled=True)
+                    st.download_button(
