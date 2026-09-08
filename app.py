@@ -60,6 +60,10 @@ st.subheader("Automated Spreadsheet-to-EDI Translation Studio")
 st.caption("🔒 Secured Workspace Session")
 st.markdown("---")
 
+# Initialize session state for declaration type
+if "declaration_type" not in st.session_state:
+    st.session_state.declaration_type = None
+
 
 # 3. Generate Built-in Template Function
 def generate_sample_template():
@@ -133,7 +137,7 @@ def generate_sample_template():
 
 
 # 4. Live Diagnostic Scanner Logic
-def validate_customs_data(parts_df, vehicles_df):
+def validate_customs_data(parts_df, vehicles_df, declaration_type):
     errors = []
     for idx, row in parts_df.iterrows():
         row_num = idx + 3
@@ -149,7 +153,8 @@ def validate_customs_data(parts_df, vehicles_df):
         if pd.isna(row.get("Country of Origin (2 Letter)")) or len(coo) != 2:
             errors.append(f"⚠️ Row {row_num} (Inv: {inv}): Country code '{coo}' should be 2 letters.")
 
-    if not vehicles_df.empty:
+    # Vehicle validation only for vehicle declarations
+    if declaration_type == "🚗 Vehicles" and not vehicles_df.empty:
         for idx, row in vehicles_df.iterrows():
             row_num = idx + 3
             v_inv = str(row.get("Invoice Number Link", "Unknown")).upper()
@@ -159,10 +164,15 @@ def validate_customs_data(parts_df, vehicles_df):
                 errors.append(f"❌ Row {row_num} (Vehicle Sheet): Missing Chassis / VIN.")
             elif len(chassis) != 17:
                 errors.append(f"❌ Row {row_num} (Vehicle Sheet, Inv: {v_inv}): Chassis string '{chassis}' is {len(chassis)} digits. Standard VINs are exactly 17 characters.")
+    elif declaration_type == "🔧 Spare Parts" and not vehicles_df.empty:
+        # For spare parts, warn if vehicle data exists
+        if not vehicles_df.empty:
+            st.warning("⚠️ Vehicle data detected but will be ignored for Spare Parts declaration.")
+    
     return errors
 
 # 5. Document Compiler Engine with Forced Capitalization
-def convert_excel_to_edi_dict(excel_file):
+def convert_excel_to_edi_dict(excel_file, declaration_type):
     try:
         parts_df = pd.read_excel(excel_file, sheet_name="Invoices & Spare Parts", skiprows=1)
     except Exception as e:
@@ -178,7 +188,7 @@ def convert_excel_to_edi_dict(excel_file):
     if not vehicles_df.empty:
         vehicles_df['Invoice Number Link'] = vehicles_df['Invoice Number Link'].astype(str).str.strip().str.upper()
 
-    validation_logs = validate_customs_data(parts_df, vehicles_df)
+    validation_logs = validate_customs_data(parts_df, vehicles_df, declaration_type)
     unique_invoices = [inv for inv in parts_df['Invoice Number'].dropna().unique() if str(inv).lower() != 'nan' and str(inv).strip() != '']
     edi_outputs = {}
 
@@ -236,8 +246,8 @@ def convert_excel_to_edi_dict(excel_file):
             ]
             writer.writerow(id_row)
 
-            # Compilation Nested Vehicle sub-row (VD)
-            if not vehicles_df.empty:
+            # Compilation Nested Vehicle sub-row (VD) - Only for vehicle declarations
+            if declaration_type == "🚗 Vehicles" and not vehicles_df.empty:
                 matching_vds = vehicles_df[(vehicles_df['Invoice Number Link'] == inv_no) & (vehicles_df['Invoice Line Number Link'] == line_no)]
                 for _, v in matching_vds.iterrows():
                     brand_raw = str(v.get("Vehicle Brand Code", 5)).strip()
@@ -302,48 +312,89 @@ with col_template2:
 
 st.markdown("---")
 
-# --- MOVED INTERFACE TO THE TOP FOR MAXIMUM VISIBILITY ---
-st.markdown("## ⚙️ Upload & Process Declaration")
-w1, w2 = st.columns(2)
+# --- DECLARATION TYPE SELECTION ---
+st.markdown("## 🎯 Step 1: Select Declaration Type")
+st.caption("Choose what type of declaration you want to generate")
 
-with w1:
-    st.info("💡 **Step 1: Document Upload**")
-    uploaded_file = st.file_uploader("Upload your Customs_Template.xlsx file here", type=["xlsx"])
+col_btn1, col_btn2, col_spacer = st.columns([2, 2, 1])
 
-with w2:
-    st.success("⚡ **Step 2: Analysis & File Generation**")
-    if uploaded_file is not None:
-        with st.spinner("Analyzing spreadsheet arrays and forcing uppercase formatting..."):
-            output_files, logs = convert_excel_to_edi_dict(uploaded_file)
-            
-        if logs:
-            st.error("🚨 **Spreadsheet Validation Warning Logs**")
-            for log in logs:
-                st.write(log)
-            st.warning("Please verify data warnings prior to clearing submissions.")
-        else:
-            st.success("✅ **Data Quality Scan Passed! All values have been processed successfully.**")
-            
-        if output_files:
-            st.markdown(f"### 📂 Split Invoice Batches Available: `{len(output_files)}`")
-            for filename, text_data in output_files.items():
-                with st.expander(f"📁 {filename}", expanded=True):
-                    st.text_area("File content preview (All Capitalized)", text_data[:400], height=120, disabled=True)
-                    # Complete Download Button structure configuration
-                    st.download_button(
-                        label=f"⬇️ Download File Stream", 
-                        data=text_data,
-                        file_name=filename, 
-                        mime="text/plain", 
-                        key=filename
-                    )
+with col_btn1:
+    if st.button("🔧 Spare Parts", use_container_width=True, key="spare_parts_btn"):
+        st.session_state.declaration_type = "🔧 Spare Parts"
+        st.rerun()
+
+with col_btn2:
+    if st.button("🚗 Vehicles", use_container_width=True, key="vehicles_btn"):
+        st.session_state.declaration_type = "🚗 Vehicles"
+        st.rerun()
+
+# Display selected type
+if st.session_state.declaration_type:
+    st.success(f"✅ Declaration Type Selected: **{st.session_state.declaration_type}**")
+    
+    # Show type-specific information
+    if st.session_state.declaration_type == "🔧 Spare Parts":
+        st.info("""
+        **Spare Parts Declaration** 🔧
+        - Process invoices for automotive spare parts
+        - Vehicle details will be ignored if present
+        - Focus on HS codes and spare part specifications
+        """)
     else:
-        st.info("System operational. Drop your tracking spreadsheets above to execute structural compilation blocks.")
+        st.info("""
+        **Vehicle Declaration** 🚗
+        - Process invoices for vehicle imports
+        - Includes vehicle specifications and chassis numbers
+        - Requires detailed vehicle information
+        """)
+
+st.markdown("---")
+
+# --- MOVED INTERFACE TO THE TOP FOR MAXIMUM VISIBILITY ---
+if st.session_state.declaration_type:
+    st.markdown("## ⚙️ Upload & Process Declaration")
+    w1, w2 = st.columns(2)
+
+    with w1:
+        st.info("💡 **Step 2: Document Upload**")
+        uploaded_file = st.file_uploader("Upload your Customs_Template.xlsx file here", type=["xlsx"])
+
+    with w2:
+        st.success("⚡ **Step 3: Analysis & File Generation**")
+        if uploaded_file is not None:
+            with st.spinner("Analyzing spreadsheet arrays and forcing uppercase formatting..."):
+                output_files, logs = convert_excel_to_edi_dict(uploaded_file, st.session_state.declaration_type)
+                
+            if logs:
+                st.error("🚨 **Spreadsheet Validation Warning Logs**")
+                for log in logs:
+                    st.write(log)
+                st.warning("Please verify data warnings prior to clearing submissions.")
+            else:
+                st.success("✅ **Data Quality Scan Passed! All values have been processed successfully.**")
+                
+            if output_files:
+                st.markdown(f"### 📂 Split Invoice Batches Available: `{len(output_files)}`")
+                for filename, text_data in output_files.items():
+                    with st.expander(f"📁 {filename}", expanded=True):
+                        st.text_area("File content preview (All Capitalized)", text_data[:400], height=120, disabled=True)
+                        # Complete Download Button structure configuration
+                        st.download_button(
+                            label=f"⬇️ Download File Stream", 
+                            data=text_data,
+                            file_name=filename, 
+                            mime="text/plain", 
+                            key=filename
+                        )
+        else:
+            st.info("System operational. Drop your tracking spreadsheets above to execute structural compilation blocks.")
+else:
+    st.warning("⚠️ Please select a declaration type first (Spare Parts or Vehicles) to proceed with file upload and processing.")
 
 st.markdown("<br><br><hr>", unsafe_allow_html=True)
 
 
-# 5. Interactive Code Search desk (Moved to the bottom)
+# 6. Interactive Code Search desk (Moved to the bottom)
 st.markdown("### 🔍 Live Customs Definition Lookup Desk")
 tab1, tab2, tab3 = st.tabs(["📦 HS Code & Rules", "🚘 Vehicle Specification Codes", "🌍 Payment Terms & Currencies"])
 
