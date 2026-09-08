@@ -3,6 +3,7 @@ import pandas as pd
 import csv
 import io
 import re
+from datetime import datetime
 
 # Pull official lookup data blocks from separate customs_data file
 import customs_data
@@ -60,7 +61,78 @@ st.caption("🔒 Secured Workspace Session")
 st.markdown("---")
 
 
-# 3. Live Diagnostic Scanner Logic
+# 3. Generate Built-in Template Function
+def generate_sample_template():
+    """
+    Generate a properly formatted Excel template with sample data
+    """
+    # Create sample data for Invoices & Spare Parts sheet
+    parts_data = {
+        "Invoice Number": ["INV-2024-001", "INV-2024-001", "INV-2024-002"],
+        "Invoice Date (YYYY-MM-DD)": ["2024-01-15", "2024-01-15", "2024-01-20"],
+        "Line Number": [1, 2, 1],
+        "HS Code": ["87082990", "40117020", "85044020"],
+        "Goods Description": ["VEHICLE SPARE PARTS", "RUBBER TYRES", "AUTOMOTIVE WIRING"],
+        "Goods Condition (N/U)": ["N", "N", "N"],
+        "Quantity": [5, 10, 20],
+        "Net Weight (kg)": [150.5, 280.0, 45.25],
+        "Line Total Value": [5000.00, 3500.00, 2200.00],
+        "Country of Origin (2 Letter)": ["JP", "IN", "DE"],
+        "Seller Name": ["HONDA PARTS CO", "APOLLO TYRES", "BOSCH GMBH"],
+        "Invoice Currency": ["AED", "AED", "AED"],
+        "Total Invoice Value": [8500.00, 3500.00, 2200.00],
+        "INCO Terms": ["CIF", "FOB", "CIF"],
+    }
+    
+    parts_df = pd.DataFrame(parts_data)
+    
+    # Create sample data for Vehicle Details sheet
+    vehicle_data = {
+        "Invoice Number Link": ["INV-2024-001", "INV-2024-001"],
+        "Invoice Line Number Link": [1, 2],
+        "Vehicle Chassis Number": ["WBADT43452G915123", "IFFIN2S15Y5X25894"],
+        "Vehicle Brand Code": ["5", "8"],
+        "Vehicle Model": ["BMW 320I", "MARUTI SWIFT"],
+        "Vehicle Engine Number": ["SN123456", "EN987654"],
+        "Engine Capacity (Liters)": [2.0, 1.2],
+        "Passenger Capacity": [5, 5],
+        "Carriage Capacity (Tons)": [0.0, 0.0],
+        "Year of Built (YYYY)": [2023, 2023],
+        "Vehicle Color": ["BLACK", "WHITE"],
+        "Vehicle Condition (New/Used)": ["New", "New"],
+        "Vehicle Type": ["CAR", "CAR"],
+        "Vehicle Drive (L/R)": ["L", "R"],
+        "Specification (1=GCC, 2=Non-GCC)": [2, 1],
+    }
+    
+    vehicle_df = pd.DataFrame(vehicle_data)
+    
+    # Create Excel file with multiple sheets
+    output = io.BytesIO()
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        parts_df.to_excel(writer, sheet_name="Invoices & Spare Parts", index=False, startrow=1)
+        vehicle_df.to_excel(writer, sheet_name="Vehicle Details", index=False, startrow=1)
+        
+        # Add header row with instructions
+        workbook = writer.book
+        
+        # Invoices & Spare Parts sheet
+        ws1 = writer.sheets["Invoices & Spare Parts"]
+        ws1['A1'] = "INSTRUCTIONS: Fill in the data below. All fields marked with * are required. HS Codes must be 8+ digits. Country codes must be 2 letters."
+        ws1['A1'].font = ws1['A1'].font.copy()
+        ws1.row_dimensions[1].height = 30
+        
+        # Vehicle Details sheet
+        ws2 = writer.sheets["Vehicle Details"]
+        ws2['A1'] = "INSTRUCTIONS: Fill in vehicle details. Chassis Number must be exactly 17 characters (VIN). Leave blank if no vehicles."
+        ws2['A1'].font = ws2['A1'].font.copy()
+        ws2.row_dimensions[1].height = 25
+    
+    output.seek(0)
+    return output.getvalue()
+
+
+# 4. Live Diagnostic Scanner Logic
 def validate_customs_data(parts_df, vehicles_df):
     errors = []
     for idx, row in parts_df.iterrows():
@@ -89,7 +161,7 @@ def validate_customs_data(parts_df, vehicles_df):
                 errors.append(f"❌ Row {row_num} (Vehicle Sheet, Inv: {v_inv}): Chassis string '{chassis}' is {len(chassis)} digits. Standard VINs are exactly 17 characters.")
     return errors
 
-# 4. Document Compiler Engine with Forced Capitalization
+# 5. Document Compiler Engine with Forced Capitalization
 def convert_excel_to_edi_dict(excel_file):
     try:
         parts_df = pd.read_excel(excel_file, sheet_name="Invoices & Spare Parts", skiprows=1)
@@ -195,7 +267,43 @@ def convert_excel_to_edi_dict(excel_file):
     return edi_outputs, validation_logs
 
 
+# --- TEMPLATE DOWNLOAD SECTION ---
+st.markdown("## 📋 Built-in Template Download")
+col_template1, col_template2 = st.columns(2)
+
+with col_template1:
+    st.info("📥 **Download Sample Template**")
+    st.caption("Get a pre-formatted Excel file with all required columns and sample data.")
+    template_data = generate_sample_template()
+    st.download_button(
+        label="⬇️ Download Customs_Template.xlsx",
+        data=template_data,
+        file_name=f"Customs_Template_Sample_{datetime.now().strftime('%Y%m%d')}.xlsx",
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        key="template_download"
+    )
+
+with col_template2:
+    st.success("📝 **Template Instructions**")
+    st.markdown("""
+    ✅ **Required Columns** (Invoices Sheet):
+    - Invoice Number, Date, HS Code, Country Code
+    - Quantity, Weight, Line Value
+    
+    ✅ **Vehicle Details** (Optional Sheet):
+    - Chassis Number (17 chars), Brand Code, Model
+    - Engine details, Color, Condition
+    
+    ⚠️ **Data Rules**:
+    - HS Codes: 8+ digits (dots removed automatically)
+    - Country: Exactly 2 letters (e.g., JP, DE, IN)
+    - Dates: YYYY-MM-DD format
+    """)
+
+st.markdown("---")
+
 # --- MOVED INTERFACE TO THE TOP FOR MAXIMUM VISIBILITY ---
+st.markdown("## ⚙️ Upload & Process Declaration")
 w1, w2 = st.columns(2)
 
 with w1:
@@ -272,4 +380,3 @@ with tab3:
     with s_col2:
         st.write("**INCOTERMS Codes:**")
         st.dataframe(pd.DataFrame(list(customs_data.INCOTERMS.items()), columns=["ID", "Incoterm Code"]), hide_index=True, use_container_width=True)
-
